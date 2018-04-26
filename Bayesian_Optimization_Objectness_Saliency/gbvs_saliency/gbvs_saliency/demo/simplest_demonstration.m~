@@ -1,0 +1,57 @@
+
+% example of how to call gbvs with default params
+figrimDir = ('samplepics/FIGRIM/');
+dataset = dir(fullfile(strcat(filgrimDir,'images/'),'*.jpg'));
+for i = 1 : length(dataset)
+    baseImgName = dataset(k).name;
+    fullImgName = fullfile('
+    img = imread('samplepics/FIGRIM/images/%d.jpg');
+    fixations = load('samplepics/FIGRIM/fixlocs/%d.mat');
+    [frow, fcol] = find(g.fixLocs == 1);
+    
+    params = makeGBVSParams();
+    out_gbvs = gbvs(img, params);
+    out_itti = ittikochmap(img); % don't worry about this, for visualization purposes
+%     rc = load('row_col.mat');
+%     X = rc.row;
+%     Y = rc.col;
+    %  
+    % This outputs ROC Area-Under-Curve Score between a saliency map and fixat-
+    %         ions.
+    % 
+    %          salmap       : a saliency map
+    %          X            : vector of X locations of fixations in original image
+    %          Y            : vector of Y locations of fixations in original image
+    %          origimgsize  : size of original image (should have same aspect ratio as
+    %                         saliency map) 
+    score = rocScoreSaliencyVsFixations(out_gbvs.master_map, frow, fcol, out_gbvs.paramsUsed.origimgsize)
+
+    % Below is visualization of saliency map, comment out if you like %
+
+    subplot(2,3,1);
+    imshow(img);
+    title('Original Image');
+
+    subplot(2,3,2);
+    show_imgnmap(img,out_gbvs);
+    title('GBVS map overlayed');
+
+    subplot(2,3,3);
+    show_imgnmap(img,out_itti);
+    title('Itti/Koch map overlayed');
+
+
+    subplot(2,3,5);
+    imshow( out_gbvs.master_map_resized );
+    title('GBVS map');
+
+    subplot(2,3,6);
+    imshow(out_itti.master_map_resized);
+    title('Itti/Koch map');
+    
+    % Comment below to run without pause
+    if ( i < 210 )
+        fprintf(1,'Now waiting for user to press enter...\n');
+        pause;
+    end
+end
